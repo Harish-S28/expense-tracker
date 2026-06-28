@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expense Tracker</title>
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="brand">
+    <span class="brand-icon">₹</span>
+    <span class="brand-name">SpendLog</span>
+  </div>
+  <nav>
+    <button class="nav-btn active" data-page="dashboard">
+      <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+      Dashboard
+    </button>
+    <button class="nav-btn" data-page="add">
+      <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+      Add Expense
+    </button>
+    <button class="nav-btn" data-page="history">
+      <svg viewBox="0 0 24 24"><path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+      History
+    </button>
+  </nav>
+</aside>
+
+<main class="main">
+
+  <!-- ── DASHBOARD ─────────────────────────────── -->
+  <section id="page-dashboard" class="page active">
+    <header class="page-header">
+      <h1>Dashboard</h1>
+      <div class="month-picker-wrap">
+        <label>Month</label>
+        <input type="month" id="dash-month" />
+        <button id="dash-clear" class="btn-ghost">All time</button>
+      </div>
+    </header>
+
+    <div class="stat-grid">
+      <div class="stat-card accent">
+        <div class="stat-label">Total Spent</div>
+        <div class="stat-value" id="stat-total">₹0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Transactions</div>
+        <div class="stat-value" id="stat-count">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg per Entry</div>
+        <div class="stat-value" id="stat-avg">₹0</div>
+      </div>
+    </div>
+
+    <div class="charts-row">
+      <div class="card chart-card">
+        <h3>By Category</h3>
+        <canvas id="chart-cat" height="220"></canvas>
+        <div id="cat-legend" class="legend"></div>
+      </div>
+      <div class="card chart-card">
+        <h3>Monthly Trend</h3>
+        <canvas id="chart-trend" height="220"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Top Spending Days</h3>
+      <table class="data-table" id="top-days-table">
+        <thead><tr><th>Date</th><th>Amount</th><th>Bar</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── ADD EXPENSE ────────────────────────────── -->
+  <section id="page-add" class="page">
+    <header class="page-header"><h1>Add Expense</h1></header>
+    <div class="card form-card">
+      <div class="form-group">
+        <label>Date</label>
+        <input type="date" id="f-date" />
+      </div>
+      <div class="form-group">
+        <label>Amount (₹)</label>
+        <input type="number" id="f-amount" placeholder="0.00" min="0" step="0.01" />
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <div class="cat-pills" id="cat-pills"></div>
+        <input type="text" id="f-category" placeholder="Or type a new category…" />
+      </div>
+      <div class="form-group">
+        <label>Note <span class="muted">(what did you spend on?)</span></label>
+        <textarea id="f-note" rows="3" placeholder="e.g. Lunch at hotel, bus ticket to Chennai…"></textarea>
+      </div>
+      <button class="btn-primary" id="btn-add">Save Expense</button>
+      <div id="add-msg" class="msg"></div>
+    </div>
+  </section>
+
+  <!-- ── HISTORY ────────────────────────────────── -->
+  <section id="page-history" class="page">
+    <header class="page-header"><h1>History</h1></header>
+    <div class="filter-bar card">
+      <input type="text"   id="h-search"   placeholder="Search notes or category…" />
+      <select id="h-category">
+        <option value="">All categories</option>
+      </select>
+      <input type="month"  id="h-month" />
+      <button class="btn-ghost" id="h-clear">Clear</button>
+    </div>
+    <div class="card">
+      <table class="data-table" id="history-table">
+        <thead>
+          <tr>
+            <th>Date</th><th>Category</th><th>Note</th><th>Amount</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="history-body"></tbody>
+      </table>
+      <div id="history-empty" class="empty-state" style="display:none">
+        No expenses found. Add your first one!
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="/static/js/app.js"></script>
+</body>
+</html>
