@@ -6,6 +6,9 @@ from datetime import datetime
 app = Flask(__name__)
 DB_PATH = os.path.join(os.path.dirname(__file__), 'expenses.db')
 
+with app.app_context():
+    init_db()
+
 def get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -139,3 +142,4 @@ if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     print('\n  Expense Tracker running → http://127.0.0.1:5000\n')
     app.run(host='0.0.0.0', port=port, debug=False)
+init_db()
