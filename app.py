@@ -6,9 +6,6 @@ from datetime import datetime
 app = Flask(__name__)
 DB_PATH = os.path.join(os.path.dirname(__file__), 'expenses.db')
 
-with app.app_context():
-    init_db()
-
 def get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -27,6 +24,9 @@ def init_db():
             )
         ''')
         conn.commit()
+
+# Initialize DB immediately when app starts
+init_db()
 
 # ── Pages ──────────────────────────────────────────────
 @app.route('/')
@@ -52,7 +52,7 @@ def add_expense():
 @app.route('/api/expenses', methods=['GET'])
 def get_expenses():
     category = request.args.get('category')
-    month    = request.args.get('month')   # YYYY-MM
+    month    = request.args.get('month')
     search   = request.args.get('search')
 
     query  = 'SELECT * FROM expenses WHERE 1=1'
@@ -82,10 +82,18 @@ def delete_expense(expense_id):
         conn.commit()
     return jsonify({'message': 'Deleted'})
 
+# ── API: Clear all expenses ─────────────────────────────
+@app.route('/api/expenses/clear', methods=['DELETE'])
+def clear_all():
+    with get_db() as conn:
+        conn.execute('DELETE FROM expenses')
+        conn.commit()
+    return jsonify({'message': 'All data cleared'})
+
 # ── API: Analytics ──────────────────────────────────────
 @app.route('/api/analytics', methods=['GET'])
 def analytics():
-    month = request.args.get('month')  # YYYY-MM, optional
+    month = request.args.get('month')
 
     filter_sql = ''
     params     = []
@@ -94,37 +102,32 @@ def analytics():
         params.append(month)
 
     with get_db() as conn:
-        # Total
         total = conn.execute(
             f'SELECT COALESCE(SUM(amount),0) as total FROM expenses{filter_sql}', params
         ).fetchone()['total']
 
-        # By category
         by_cat = conn.execute(
             f'SELECT category, SUM(amount) as total FROM expenses{filter_sql} GROUP BY category ORDER BY total DESC',
             params
         ).fetchall()
 
-        # By date (top spending days)
         by_date = conn.execute(
             f'SELECT date, SUM(amount) as total FROM expenses{filter_sql} GROUP BY date ORDER BY total DESC LIMIT 10',
             params
         ).fetchall()
 
-        # Monthly trend (last 6 months)
         trend = conn.execute(
             "SELECT strftime('%Y-%m', date) as month, SUM(amount) as total "
             "FROM expenses GROUP BY month ORDER BY month DESC LIMIT 6"
         ).fetchall()
 
-        # Count
         count = conn.execute(
             f'SELECT COUNT(*) as cnt FROM expenses{filter_sql}', params
         ).fetchone()['cnt']
 
     return jsonify({
-        'total':      round(total, 2),
-        'count':      count,
+        'total':       round(total, 2),
+        'count':       count,
         'by_category': [dict(r) for r in by_cat],
         'by_date':     [dict(r) for r in by_date],
         'trend':       [dict(r) for r in reversed(trend)]
@@ -138,8 +141,6 @@ def categories():
     return jsonify([r['category'] for r in rows])
 
 if __name__ == '__main__':
-    init_db()
     port = int(os.environ.get('PORT', 5000))
     print('\n  Expense Tracker running → http://127.0.0.1:5000\n')
     app.run(host='0.0.0.0', port=port, debug=False)
-init_db()
