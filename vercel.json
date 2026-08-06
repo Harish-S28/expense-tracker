@@ -5,8 +5,12 @@
       "src": "app.py",
       "use": "@vercel/python",
       "config": {
-        "includeFiles": ["templates/**", "static/**"]
+        "includeFiles": ["templates/**"]
       }
+    },
+    {
+      "src": "static/**",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
